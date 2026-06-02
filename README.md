@@ -1,165 +1,61 @@
-# Four Simplex Diagnostic Tool
+# Four Simplex
 
-A small TypeScript + React diagnostic app for exploring a 4-metric state inside a simplex, evaluating whether the state is inside a configured healthy region, and visualizing the result as a rotatable 3D tetrahedral embedding of the four-simplex.
+A small interactive demo for exploring how a four-factor balance sits inside or outside a healthy region.
 
-## Overview
+## What it does
 
-The app models a state as four non-negative weights \(w_1..w_4\) that are normalized so that they sum to 1. This is a barycentric representation over a simplex, where each vertex corresponds to one metric axis such as H, L, M, and P.
+This app takes four raw estimates, normalizes them into simplex coordinates, plots the result in a tetrahedral view, and reports whether the point sits inside the configured healthy polytope.
 
-The current implementation supports:
+It also generates a short plain-language summary so someone can understand the result without reading the raw coordinates.
 
-- Configurable axis labels.
-- Per-axis healthy-region bounds using min/max values.
-- Raw estimate input with automatic normalization to simplex coordinates.
-- A diagnostic readout including normalized weights, distance from centroid, lamb/wolf scalar `x`, and two parity bits.
-- A rotatable 3D visualization of the tetrahedral embedding using React Three Fiber.
+## How to read it
 
-## Conceptual Model
+- **Normalized w** shows the four normalized shares.
+- **Distance from centroid** shows how far the point is from the balanced center.
+- **x (lamb/wolf scalar)** is an orientation-style scalar used by the demo.
+- **Bit A** reports whether the point is inside the configured healthy region.
+- **Bit B** reports the current orientation state.
+- **Summary** explains the strongest driver of the result in plain language.
 
-### State space
+## Healthy region
 
-A state is represented by barycentric coordinates:
+Each axis has:
 
-\[
-(w_1, w_2, w_3, w_4), \quad w_i \ge 0, \quad \sum_{i=1}^{4} w_i = 1
-\]
+- a label
+- a target share
+- a tolerance band
 
-Each coordinate measures the contribution of one metric axis.
+A point is treated as healthy when all four normalized coordinates remain within their configured target bands.
 
-### Healthy region
+## Scope
 
-The healthy region is currently approximated by per-axis lower and upper bounds:
+This version is intentionally simple.
 
-- `metric.min <= w_i <= metric.max`
-- plus the simplex constraints \(w_i \ge 0\) and \(\sum w_i = 1\)
-
-This gives a small executable contract that is easy to tune.
-
-### Parity bits
-
-The diagnostic exposes two bits:
-
-- **Bit A**: inside or outside the configured healthy region.
-- **Bit B**: lamb or wolf orientation, derived from the sign of scalar `x`.
-
-### Lamb/wolf scalar
-
-The scalar `x` is based on distance from the centroid of the simplex and a sign convention:
-
-- positive `x` means lamb-ward
-- negative `x` means wolf-ward
-
-This is intentionally lightweight so the parity contract remains stable even if the geometry becomes more sophisticated later.
-
-## Project Structure
-
-A typical layout is:
-
-```text
-src/
-  App.tsx
-  simplex-core.ts
-  simplex-3d.ts
-  Simplex3D.tsx
-```
-
-### File roles
-
-- `App.tsx` — UI state, form inputs, diagnostic readout, top-level composition.
-- `simplex-core.ts` — normalization, healthy-region check, lamb/wolf scalar, parity computation.
-- `simplex-3d.ts` — barycentric-to-3D mapping using tetrahedron vertices.
-- `Simplex3D.tsx` — React Three Fiber scene with tetrahedron edges, point marker, and orbit controls.
-
-## Installation
-
-Install dependencies:
-
-```bash
-npm install
-npm install three @react-three/fiber @react-three/drei
-```
-
-If the project was created with Vite:
-
-```bash
-npm run dev
-```
-
-If the project was created with Create React App:
-
-```bash
-npm start
-```
+- It is a simplex-only introductory demo.
+- Raw inputs are non-negative.
+- The app focuses on share, balance, drift, and readable diagnostics.
+- It does not currently model signed coordinates or an external affine field.
 
 ## Usage
 
-1. Set the four axis labels and their healthy-region min/max values.
-2. Enter raw estimates for the four metrics.
-3. The app normalizes the values into simplex coordinates.
-4. Read the diagnostic outputs:
-   - normalized `w`
-   - distance from centroid
-   - lamb/wolf scalar `x`
-   - Bit A: inside/outside
-   - Bit B: lamb/wolf
-5. Rotate the 3D tetrahedron to inspect the point from different viewing angles.
+1. Set the axis labels, targets, and tolerances.
+2. Enter four raw estimates.
+3. Read the normalized point, diagnostic flags, and summary.
+4. Adjust values to see how the point moves relative to the healthy region.
 
-## Example Interpretation
+## Why this exists
 
-Given raw estimates:
+The point of the demo is to make a four-way tradeoff visible.
 
-```text
-H = 14
-L = 15
-M = 12
-P = 13
-```
+Instead of only showing raw numbers, it lets someone see:
 
-The app converts these into normalized barycentric weights. If the resulting point lies outside the configured min/max bounds, Bit A becomes `OUTSIDE (1)`. If `x < 0`, Bit B becomes `WOLF (0)`.
+- the shape of the balance
+- whether the current state is still in range
+- which factor is pushing the point out of range
 
-This lets the app act as a compact diagnostic surface for both specification compliance and directional orientation.
+## Next ideas
 
-## Notes on Geometry
-
-A four-simplex naturally lives in four dimensions, but barycentric coordinates over four components can be embedded as a tetrahedron in 3D for interaction. The current visualizer uses a tetrahedral embedding so the point can be inspected with orbit controls instead of flattening everything into 2D.
-
-This preserves more geometric intuition than a 2D projection, though it still remains a visualization of the barycentric state rather than a full direct rendering of four-dimensional space.
-
-## Known Limitations
-
-- No barycentric reflection implemented
-- The lamb/wolf scalar uses a lightweight sign-and-distance rule rather than a full optimization or projection onto the healthy-region boundary.
-- Labels and region mesh can be refined further.
-- The visualizer is intended as a diagnostic aid, not a mathematically exhaustive simplex analysis environment.
-
-## Possible Next Steps
-
-- Implement barycentric reflection to accomodate negative values (outside the simplex - wolf field)
-- Compute projection onto the healthy region and derive `x` from boundary distance.
-- Add trajectories through time for repeated measurements.
-- Add vertex labels in 3D using HTML overlays.
-- Add presets for different domain models beyond H/L/M/P.
-
-## Development Tips
-
-### Common React Three Fiber issue
-
-If TypeScript complains that `bufferAttribute` is missing `args`, use:
-
-```tsx
-<bufferAttribute attach="attributes-position" args={[positions, 3]} />
-```
-
-instead of manually passing `count`, `itemSize`, and `array` props.
-
-### Common config issue
-
-If the visualizer throws an error while reading `metrics`, ensure:
-
-- `config` is always defined before rendering the visualizer.
-- `config.metrics.length === 4` before mounting the 3D component.
-- defensive guards exist inside `useEffect` or render logic.
-
-## License
-
-Add your preferred license here.
+- Custom presets for named schemas
+- Saved snapshots and trajectories
+- Better explanation strings for max/min band crossings
+- UI polish for labels and status states

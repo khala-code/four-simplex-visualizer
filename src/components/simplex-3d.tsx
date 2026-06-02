@@ -5,18 +5,7 @@ import { ConvexGeometry } from "three/examples/jsm/geometries/ConvexGeometry.js"
 import { healthyRegionPoints3D } from "./healthy-region"
 import { SimplexConfig } from "./simplex-core"
 import { barycentric4To3 } from "./simplex-3d"
-import { MetricSpec } from "./simplex-core"
-
-export function normalizeTargets(metrics: MetricSpec[]): number[] {
-  const raw = metrics.map(m => Math.max(0, m.target))
-  const sum = raw.reduce((a, b) => a + b, 0)
-
-  if (sum <= 0) {
-    return [0.25, 0.25, 0.25, 0.25]
-  }
-
-  return raw.map(v => v / sum)
-}
+import { MetricSpec, normalizeTargets } from "./simplex-core"
 
 export function isValidTargetConfig(metrics: MetricSpec[]): boolean {
   if (metrics.length !== 4) return false

@@ -5,6 +5,7 @@ import { OrbitControls } from "@react-three/drei"
 import { SimplexConfig, DiagnosticResult } from "./simplex-core"
 import { barycentric4To3, tetraVertices3D } from "./simplex-3d"
 import { HealthyRegionMesh, TargetPoint } from "./simplex-3d.tsx"
+import { Html } from "@react-three/drei"
 
 interface Props {
   config: SimplexConfig
@@ -26,8 +27,8 @@ function SimplexGeometry({ config, result }: { config: SimplexConfig; result: Di
     []
   )
 
-  const { normalizedW, parity } = result
-  const point = barycentric4To3(normalizedW)
+  const { affineW, parity } = result
+  const point = barycentric4To3(affineW)
 
   const color = parity.insideGoodPolytope
     ? parity.lambward
@@ -68,7 +69,20 @@ function SimplexGeometry({ config, result }: { config: SimplexConfig; result: Di
             <sphereGeometry args={[0.05, 16, 16]} />
             <meshBasicMaterial color="#bbb" />
           </mesh>
-          {/* optional: label via HTML overlay later */}
+            <Html distanceFactor={8} occlude>
+            <div
+                style={{
+                color: "#ddd",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
+                background: "rgba(0,0,0,0.65)",
+                padding: "2px 6px",
+                borderRadius: "6px"
+                }}
+            >
+                {config.metrics[i]?.name ?? `m${i + 1}`}
+            </div>
+            </Html>
         </group>
       ))}
 

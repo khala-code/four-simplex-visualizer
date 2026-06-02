@@ -109,8 +109,8 @@ export const SimplexVisualizer: React.FC<Props> = ({
     }
 
     // 4) Draw current point
-    const { normalizedW, parity } = result
-    const point2D = toPixel(barycentric4To2(normalizedW))
+    const { affineW, parity } = result
+    const point2D = toPixel(barycentric4To2(affineW))
 
     const color = parity.insideGoodPolytope
       ? parity.lambward

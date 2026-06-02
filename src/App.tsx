@@ -5,8 +5,8 @@ import {
   SimplexConfig,
   computeParityBits
 } from "./components/simplex-core"
-import { SimplexVisualizer } from "./components/simplex-visualizer"
 import { Simplex3D } from "./components/simplex-scene"
+import { summarizeDiagnostic } from "./components/summarizer"
 
 const defaultMetrics: MetricSpec[] = [
   { id: 0, name: "H", target: 0.25, tolerance: 0.1 },
@@ -26,6 +26,7 @@ export const App: React.FC = () => {
   }
 
   const result = computeParityBits(raw, config)
+  const summary = summarizeDiagnostic(result, config)
 
   const updateMetric = (index: number, patch: Partial<MetricSpec>) => {
     setMetrics(prev =>
@@ -39,6 +40,13 @@ export const App: React.FC = () => {
       prev.map((x, i) => (i === index ? (isNaN(v) ? 0 : v) : x))
     )
   }
+
+  const summaryColor =
+    summary.status === "healthy"
+      ? "#81c784"
+      : summary.status === "drift"
+      ? "#ffb74d"
+      : "#e57373"
 
   return (
     <div style={{ padding: 32, color: "#eee", background: "#111", minHeight: "100vh" }}>
@@ -100,21 +108,51 @@ export const App: React.FC = () => {
 
         {/* Middle: diagnostic readout */}
         <div>
-          <h3>Diagnostic</h3>
-          <p>
-            Normalized w = [
-            {result.normalizedW.map(v => v.toFixed(3)).join(", ")}]
-          </p>
-          <p>Distance from centroid: {result.distanceFromCentroid.toFixed(3)}</p>
-          <p>x (lamb/wolf scalar): {result.x.toFixed(3)}</p>
-          <p>
-            Bit A (good polytope):{" "}
-            {result.parity.insideGoodPolytope ? "OUTSIDE (1)" : "INSIDE (0)"}
-          </p>
-          <p>
-            Bit B (orientation):{" "}
-            {result.parity.lambward ? "LAMB (1)" : "WOLF (0)"}
-          </p>
+          <div>
+            <h3>Diagnostic</h3>
+            <p>
+              Normalized w = [
+              {result.affineW.map(v => v.toFixed(3)).join(", ")}]
+            </p>
+            <p>Distance from centroid: {result.distanceFromCentroid.toFixed(3)}</p>
+            <p>x (lamb/wolf scalar): {result.x.toFixed(3)}</p>
+            <p>
+              Bit A (good polytope):{" "}
+              {result.parity.insideGoodPolytope ? "INSIDE (1)" : "OUTSIDE (0)"}
+            </p>
+            <p>
+              Bit B (orientation):{" "}
+              {result.parity.lambward ? "LAMB (1)" : "WOLF (0)"}
+            </p>
+          </div>
+          <div style={{ marginTop: 16, maxWidth: 420 }}>
+            <h4 style={{ marginBottom: 8 }}>Summary</h4>
+
+            <p style={{ marginBottom: 8, color: summaryColor }}>
+              <strong>{summary.headline}</strong>
+            </p>
+
+            <p style={{ marginBottom: 8, color: "#ccc" }}>
+              {summary.explanation}
+            </p>
+
+            <p style={{ marginBottom: 8 }}>
+              Status:{" "}
+              {summary.status === "healthy"
+                ? "Healthy"
+                : summary.status === "drift"
+                ? "Drift"
+                : "At risk"}
+            </p>
+
+            {summary.drivers.length > 0 && (
+              <ul style={{ margin: 0, paddingLeft: 18, color: "#bbb" }}>
+                {summary.drivers.map(driver => (
+                  <li key={driver}>{driver}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         {/* Right: visualizer (only render when metrics are ready) */}

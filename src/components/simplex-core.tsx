@@ -64,7 +64,7 @@ export const SimplexDiagnostic: React.FC = () => {
                 step="0.01"
                 value={m.tolerance}
                 onChange={e =>
-                  updateMetric(i, { tolerance: Number(e.tolerance.value) })
+                  updateMetric(i, { tolerance: Number(e.target.value) })
                 }
                 style={{ width: 60, marginLeft: 4 }}
               />
@@ -93,7 +93,7 @@ export const SimplexDiagnostic: React.FC = () => {
         <h3>Diagnostic</h3>
         <p>
           Normalized w = [
-          {result.normalizedW.map(v => v.toFixed(3)).join(", ")}]
+          {result.affineW.map((v:number) => v.toFixed(3)).join(", ")}]
         </p>
         <p>Distance from centroid: {result.distanceFromCentroid.toFixed(3)}</p>
         <p>x (lamb/wolf scalar): {result.x.toFixed(3)}</p>
