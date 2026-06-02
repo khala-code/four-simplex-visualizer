@@ -127,14 +127,14 @@ This preserves more geometric intuition than a 2D projection, though it still re
 
 ## Known Limitations
 
-- The healthy region is currently a simple bounded approximation rather than a rigorously projected inner polytope.
+- No barycentric reflection implemented
 - The lamb/wolf scalar uses a lightweight sign-and-distance rule rather than a full optimization or projection onto the healthy-region boundary.
 - Labels and region mesh can be refined further.
 - The visualizer is intended as a diagnostic aid, not a mathematically exhaustive simplex analysis environment.
 
 ## Possible Next Steps
 
-- Replace min/max bands with a true inner simplex or convex healthy polytope.
+- Implement barycentric reflection to accomodate negative values (outside the simplex - wolf field)
 - Compute projection onto the healthy region and derive `x` from boundary distance.
 - Add trajectories through time for repeated measurements.
 - Add vertex labels in 3D using HTML overlays.

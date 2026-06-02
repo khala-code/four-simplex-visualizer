@@ -78,7 +78,9 @@ export const SimplexVisualizer: React.FC<Props> = ({
       const w = [0, 0, 0, 0]
       for (let i = 0; i < 4; i++) {
         const m = config.metrics[i]
-        const val = (mask & (1 << i)) ? m.max : m.min
+        const val = (mask & (1 << i)) 
+            ? m.target+m.tolerance
+            : m.target-m.tolerance
         w[i] = Math.max(0, val)
       }
       const sum = w.reduce((a, b) => a + b, 0) || 1

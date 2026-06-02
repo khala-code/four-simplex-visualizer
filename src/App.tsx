@@ -9,10 +9,10 @@ import { SimplexVisualizer } from "./components/simplex-visualizer"
 import { Simplex3D } from "./components/simplex-scene"
 
 const defaultMetrics: MetricSpec[] = [
-  { id: 0, name: "H", min: 0.15, max: 0.35 },
-  { id: 1, name: "L", min: 0.15, max: 0.35 },
-  { id: 2, name: "M", min: 0.15, max: 0.35 },
-  { id: 3, name: "P", min: 0.15, max: 0.35 }
+  { id: 0, name: "H", target: 0.25, tolerance: 0.1 },
+  { id: 1, name: "L", target: 0.25, tolerance: 0.1 },
+  { id: 2, name: "M", target: 0.25, tolerance: 0.1 },
+  { id: 3, name: "P", target: 0.25, tolerance: 0.1 }
 ]
 
 export const App: React.FC = () => {
@@ -56,25 +56,25 @@ export const App: React.FC = () => {
                 style={{ width: 40, marginRight: 8 }}
               />
               <label>
-                min
+                target
                 <input
                   type="number"
                   step="0.01"
-                  value={m.min}
+                  value={m.target}
                   onChange={e =>
-                    updateMetric(i, { min: Number(e.target.value) })
+                    updateMetric(i, { target: Number(e.target.value) })
                   }
                   style={{ width: 60, marginLeft: 4, marginRight: 8 }}
                 />
               </label>
               <label>
-                max
+                tolerance
                 <input
                   type="number"
                   step="0.01"
-                  value={m.max}
+                  value={m.tolerance}
                   onChange={e =>
-                    updateMetric(i, { max: Number(e.target.value) })
+                    updateMetric(i, { tolerance: Number(e.target.value) })
                   }
                   style={{ width: 60, marginLeft: 4 }}
                 />

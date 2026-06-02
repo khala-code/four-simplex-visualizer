@@ -4,26 +4,11 @@ import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import { SimplexConfig, DiagnosticResult } from "./simplex-core"
 import { barycentric4To3, tetraVertices3D } from "./simplex-3d"
+import { HealthyRegionMesh, TargetPoint } from "./simplex-3d.tsx"
 
 interface Props {
   config: SimplexConfig
   result: DiagnosticResult
-}
-
-// Simple helper: map metric bands to a "healthy bar" segment in 3D
-function HealthyRegionMesh({ config }: { config: SimplexConfig }) {
-  // crude: sample corners as before, then draw their convex hull as a thin box.
-  // For a first pass we'll just draw a green box around the centroid to indicate region.
-  const centroid: [number, number, number] = [0, 0, 0]
-
-  const size: [number, number, number] = [1.2, 0.3, 0.3] // tweak by eye
-
-  return (
-    <mesh position={centroid}>
-      <boxGeometry args={size} />
-      <meshBasicMaterial color="#2e7d32" wireframe opacity={0.4} transparent />
-    </mesh>
-  )
 }
 
 function SimplexGeometry({ config, result }: { config: SimplexConfig; result: DiagnosticResult }) {
@@ -49,7 +34,7 @@ function SimplexGeometry({ config, result }: { config: SimplexConfig; result: Di
       ? "#ffb74d"
       : "#e53935"
     : "#64b5f6"
-    
+
     const positions = useMemo(
     () =>
         new Float32Array(
@@ -89,6 +74,7 @@ function SimplexGeometry({ config, result }: { config: SimplexConfig; result: Di
 
       {/* healthy region marker */}
       <HealthyRegionMesh config={config} />
+      <TargetPoint config={config} />
 
       {/* current state point */}
       <mesh position={point}>

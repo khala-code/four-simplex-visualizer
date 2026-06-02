@@ -3,9 +3,9 @@ export type MetricId = 0 | 1 | 2 | 3
 
 export interface MetricSpec {
   id: MetricId
-  name: string               // e.g. "H", "L", "M", "P"
-  min: number                // allowed barycentric lower bound inside "good"
-  max: number                // allowed barycentric upper bound inside "good"
+  name: string
+  target: number      // expected normalized share
+  tolerance: number   // allowed deviation from target
 }
 
 export interface SimplexConfig {
@@ -56,7 +56,9 @@ export function isInsideGoodPolytope(
   // Per-axis constraints
   for (const m of config.metrics) {
     const v = w[m.id]
-    if (v < m.min - eps || v > m.max + eps) {
+    const min = m.target - m.tolerance;
+    const max = m.target + m.tolerance;
+    if (v < min - eps || v > max + eps) {
       return false
     }
   }
